@@ -1,3 +1,4 @@
+```groovy id="uv9xt1"
 pipeline {
     agent any
 
@@ -7,55 +8,53 @@ pipeline {
 
     stages {
 
-        stage('Docker Build') {
-    steps {
-        sh '''
-        cd weathernow
+        stage('Docker Build & Push') {
+            steps {
+                sh '''
+                docker buildx create --use || true
 
-        docker buildx create --use || true
-
-        docker buildx build \
-        --platform linux/amd64 \
-        -t vyshnavi1411/weather-app:latest \
-        --push .
-        '''
-    }
-}
+                docker buildx build \
+                --platform linux/amd64 \
+                -t vyshnavi1411/weather-app:latest \
+                --push .
+                '''
+            }
+        }
 
         stage('Terraform Init') {
             steps {
-                sh 'cd weathernow/terraform && terraform init'
+                sh 'cd terraform && terraform init'
             }
         }
 
         stage('Terraform Validate') {
             steps {
-                sh 'cd weathernow/terraform && terraform validate'
+                sh 'cd terraform && terraform validate'
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                sh 'cd weathernow/terraform && terraform plan'
+                sh 'cd terraform && terraform plan'
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                sh 'cd weathernow/terraform && terraform apply -auto-approve'
+                sh 'cd terraform && terraform apply -auto-approve'
             }
         }
 
         stage('Generate Ansible Inventory') {
             steps {
                 sh '''
-                PUBLIC_IP=$(cd weathernow/terraform && terraform output -raw public_ip)
+                PUBLIC_IP=$(cd terraform && terraform output -raw public_ip)
 
-                echo "[web]" > weathernow/ansible/inventory.ini
+                echo "[web]" > ansible/inventory.ini
 
-                echo "$PUBLIC_IP ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> weathernow/ansible/inventory.ini
+                echo "$PUBLIC_IP ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ansible/inventory.ini
 
-                cat weathernow/ansible/inventory.ini
+                cat ansible/inventory.ini
                 '''
             }
         }
@@ -71,7 +70,7 @@ pipeline {
                 sh '''
                 export ANSIBLE_HOST_KEY_CHECKING=False
 
-                cd weathernow/ansible
+                cd ansible
 
                 ansible-playbook -i inventory.ini install-monitoring.yml
                 '''
@@ -83,7 +82,7 @@ pipeline {
                 sh '''
                 export ANSIBLE_HOST_KEY_CHECKING=False
 
-                PUBLIC_IP=$(cd weathernow/terraform && terraform output -raw public_ip)
+                PUBLIC_IP=$(cd terraform && terraform output -raw public_ip)
 
                 ssh -o StrictHostKeyChecking=no ubuntu@$PUBLIC_IP "sudo kubectl get nodes"
 
@@ -98,8 +97,9 @@ pipeline {
             steps {
                 input 'Do you want to destroy infrastructure?'
 
-                sh 'cd weathernow/terraform && terraform destroy -auto-approve'
+                sh 'cd terraform && terraform destroy -auto-approve'
             }
         }
     }
 }
+```

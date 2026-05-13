@@ -38,7 +38,7 @@
 
     - name: Deploy Kubernetes manifests
       shell: |
-        sudo kubectl apply -f /home/ubuntu/weather-app/weathernow/k8s/
+        sudo kubectl apply -f /home/ubuntu/weather-app/k8s/
 
     - name: Download Prometheus
       shell: |
