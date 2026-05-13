@@ -1,3 +1,4 @@
+```gitignore
 # Logs
 logs
 *.log
@@ -7,6 +8,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node
 node_modules
 dist
 dist-ssr
@@ -23,7 +25,6 @@ dist-ssr
 *.sln
 *.sw?
 
-#terraform 
 # Terraform
 terraform/.terraform/
 terraform/*.tfstate
@@ -32,3 +33,25 @@ terraform/crash.log
 terraform/*.tfvars
 terraform/*.tfvars.json
 terraform/.terraform.lock.hcl
+
+# Ansible
+ansible/inventory.ini
+
+# SSH Keys
+*.pem
+*.key
+
+# Environment files
+.env
+.env.*
+
+# Kubernetes temp files
+*.yaml.bak
+
+# Jenkins
+workspace/
+
+# Python cache
+__pycache__/
+*.pyc
+```
