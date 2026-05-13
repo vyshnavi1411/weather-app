@@ -1,0 +1,153 @@
+---
+- hosts: web
+  become: yes
+
+  tasks:
+
+    - name: Update packages
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - docker.io
+          - git
+          - wget
+          - curl
+        state: present
+
+    - name: Start Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Install K3s
+      shell: |
+        curl -sfL https://get.k3s.io | sh -
+
+    - name: Wait for K3s to start
+      shell: |
+        sleep 30
+
+    - name: Clone GitHub repository
+      git:
+        repo: 'https://github.com/vyshnavi1411/weather-app.git'
+        dest: /home/ubuntu/weather-app
+
+    - name: Deploy Kubernetes manifests
+      shell: |
+        sudo kubectl apply -f /home/ubuntu/weather-app/weathernow/k8s/
+
+    - name: Download Prometheus
+      shell: |
+        cd /home/ubuntu
+        wget https://github.com/prometheus/prometheus/releases/download/v2.54.1/prometheus-2.54.1.linux-amd64.tar.gz
+        tar -xvf prometheus-2.54.1.linux-amd64.tar.gz
+
+    - name: Configure Prometheus
+      shell: |
+        cat <<EOF > /home/ubuntu/prometheus-2.54.1.linux-amd64/prometheus.yml
+        global:
+          scrape_interval: 15s
+
+        scrape_configs:
+          - job_name: 'node_exporter'
+
+            static_configs:
+              - targets: ['localhost:9100']
+        EOF
+
+    - name: Start Prometheus
+      shell: |
+        cd /home/ubuntu/prometheus-2.54.1.linux-amd64
+        nohup ./prometheus --config.file=prometheus.yml > prometheus.log 2>&1 &
+
+    - name: Download Node Exporter
+      shell: |
+        cd /home/ubuntu
+        wget https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz
+        tar -xvf node_exporter-1.8.2.linux-amd64.tar.gz
+
+    - name: Start Node Exporter
+      shell: |
+        cd /home/ubuntu/node_exporter-1.8.2.linux-amd64
+        nohup ./node_exporter > node_exporter.log 2>&1 &
+
+    - name: Install Grafana
+      shell: |
+        apt-get install -y adduser libfontconfig1 musl
+        wget https://dl.grafana.com/enterprise/release/grafana-enterprise_11.1.0_amd64.deb
+        dpkg -i grafana-enterprise_11.1.0_amd64.deb
+
+    - name: Start Grafana
+      service:
+        name: grafana-server
+        state: started
+        enabled: yes
+
+    - name: Create Grafana datasource directory
+      file:
+        path: /etc/grafana/provisioning/datasources
+        state: directory
+
+    - name: Configure Grafana datasource
+      copy:
+        dest: /etc/grafana/provisioning/datasources/prometheus.yml
+        content: |
+          apiVersion: 1
+
+          datasources:
+            - name: Prometheus
+              type: prometheus
+              access: proxy
+              url: http://localhost:9090
+              isDefault: true
+
+    - name: Create Grafana dashboard directories
+      file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - /etc/grafana/provisioning/dashboards
+        - /var/lib/grafana/dashboards
+
+    - name: Configure dashboard provider
+      copy:
+        dest: /etc/grafana/provisioning/dashboards/dashboard.yml
+        content: |
+          apiVersion: 1
+
+          providers:
+            - name: 'Node Exporter Dashboard'
+              orgId: 1
+              folder: ''
+              type: file
+              disableDeletion: false
+              editable: true
+
+              options:
+                path: /var/lib/grafana/dashboards
+
+    - name: Download Grafana dashboard
+      get_url:
+        url: https://grafana.com/api/dashboards/1860/revisions/37/download
+        dest: /var/lib/grafana/dashboards/node-exporter-full.json
+
+    - name: Restart Grafana
+      service:
+        name: grafana-server
+        state: restarted
+
+    - name: Verify Kubernetes Nodes
+      shell: |
+        sudo kubectl get nodes
+
+    - name: Verify Kubernetes Pods
+      shell: |
+        sudo kubectl get pods
+
+    - name: Verify Kubernetes Services
+      shell: |
+        sudo kubectl get svc

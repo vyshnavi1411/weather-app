@@ -1,0 +1,54 @@
+.weather-ui {
+    margin-top: 10px;
+    color: #111;   
+}
+
+/* Top */
+.top h2 {
+    font-size: 22px;
+    font-weight: 500;
+}
+
+.condition {
+    opacity: 0.6;
+    font-size: 14px;
+}
+
+
+.temp-section h1 {
+    font-size: 65px;   
+    font-weight: 300;
+    margin: 5px 0;
+}
+
+/* Bottom cards */
+.bottom {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 20px;
+}
+
+/* Card style (LIGHT THEME FIX) */
+.card {
+    background: #f1f5f9;   
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+    transition: 0.2s;
+}
+
+.card:hover {
+    transform: scale(1.03);
+}
+
+/* Text */
+.card p {
+    font-size: 11px;
+    color: #666;
+}
+
+.card h3 {
+    margin-top: 3px;
+    font-size: 14px;
+}

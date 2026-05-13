@@ -1,0 +1,149 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+.app {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    padding: 80px 15px 20px;
+
+    background: linear-gradient(to bottom, #f8fafc, #e2e8f0);
+    font-family: Arial, sans-serif;
+    color: #111;
+}
+
+
+.app.dark {
+    background: linear-gradient(to top, #000000, #434343);
+    color: white;
+}
+
+
+.main-card {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+    border-radius: 20px;
+
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+
+.toggle-btn {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 1000;
+
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: none;
+
+    background: #4facfe;
+    color: white;
+}
+
+
+
+
+.weather-ui {
+    margin-top: 10px;
+}
+
+
+.top h2 {
+    font-size: 20px;
+}
+
+.condition {
+    font-size: 13px;
+    opacity: 0.7;
+}
+
+
+.temp-section h1 {
+    font-size: 50px;
+    margin: 5px 0;
+}
+
+
+.bottom {
+    display: grid;
+    gap: 10px;
+    margin-top: 15px;
+
+    
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+
+/* Cards */
+.card {
+    background: #f1f5f9;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.card p {
+    font-size: 11px;
+}
+
+.card h3 {
+    font-size: 14px;
+}
+
+
+
+.search-container {
+    margin-bottom: 20px;
+}
+
+.search-card {
+    width: 100%;
+    padding: 20px;
+    border-radius: 15px;
+
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+
+
+@media (max-width: 500px) {
+
+    .app {
+        padding: 70px 10px;
+    }
+
+    .main-card {
+        padding: 15px;
+    }
+
+    .temp-section h1 {
+        font-size: 40px;
+    }
+
+    .bottom {
+        grid-template-columns: repeat(2, 1fr); 
+    }
+}
+
+
+
+@media (min-width: 501px) and (max-width: 900px) {
+    .main-card {
+        max-width: 420px;
+    }
+}
